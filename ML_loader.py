@@ -35,25 +35,23 @@ class DatasetLoader():
 
     def normalize(self,features_to_normalize=None): #features_to_normalize is a list of index
         if features_to_normalize!=None:
-            return normalize(self.X[:,features_to_normalize[0]:features_to_normalize[1]])
+            return pd.DataFrame(normalize(self.X.iloc[:,features_to_normalize[0]:features_to_normalize[1]]),columns=self.X.columns[features_to_normalize[0]:features_to_normalize[1]])
 
-    def select_features(self,features): #features is a list of features [feature1,feature2,...] or [:156]
-        self.X=self.df.iloc[features]
-    
     def select_classes(self,classes): #classes is a list of classes [class1,class2,...] with len(classes) = len of dataset
         self.y = classes
         self.classes=np.unique(classes)
         self.numbers_of_classes = len(self.classes)
         
-    def split_dataset(self,test_size=0.2): #slit dataset into train and test
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_size)
+    def split_dataset(self,test_size=0.2,random_state=1): #slit dataset into train and test
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_size,random_state=random_state)
     
-    def split_dataset_class(self,class_to_group,random_state=1): #split dataset into train and test based on class
+    def split_dataset_class(self,class_to_group,test_size=0.2,random_state=1): #split dataset into train and test based on class
         # Initialize empty lists to store merged sets
         X_train_merged, X_test_merged, y_train_merged, y_test_merged = [], [], [], []
+        df_used=pd.concat([self.X,self.y],axis=1)
         for i in class_to_group.values():
-            df_temp=self.df[self.df['class'].isin(i)]
-            X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp['class'], test_size=0.2,random_state=random_state)
+            df_temp=df_used[df_used['class'].isin(i)]
+            X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp['class'], test_size=test_size,random_state=random_state)
             X_train_merged.append(X_train)
             X_test_merged.append(X_test)
             y_train_merged.append(y_train)
@@ -64,17 +62,15 @@ class DatasetLoader():
     
     def split_dataset_data(self,n,random_state=1): #split dataset by data size
         X_train_merged,X_test_merged,y_train_merged,y_test_merged=[],[],[],[]
-        df_copy=self.df.copy()
-        df_copy.pop('class')
         skf=StratifiedKFold(n_splits=n,shuffle=True,random_state=random_state)
         skf.get_n_splits(self.X_train,self.y_train)
         for i,(train_index, test_index) in enumerate(skf.split(self.X, self.y)):
-            X_train_fold=df_copy.iloc[train_index]
+            X_train_fold=self.X.iloc[train_index]
             Y_train_fold=self.y[train_index]
             X_train_merged.append(X_train_fold)
             y_train_merged.append(Y_train_fold)
 
-            X_test_fold=df_copy.iloc[test_index]
+            X_test_fold=self.X.iloc[test_index]
             Y_test_fold=self.y[test_index]
             X_test_merged.append(X_test_fold)
             y_test_merged.append(Y_test_fold)
