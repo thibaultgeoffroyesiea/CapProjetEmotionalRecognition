@@ -6,6 +6,7 @@ from sklearn.metrics import homogeneity_score
 from sklearn.preprocessing import normalize
 from memory_profiler import memory_usage
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
