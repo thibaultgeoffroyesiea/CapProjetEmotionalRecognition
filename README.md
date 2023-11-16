@@ -1,4 +1,4 @@
 # ML_model_implementation
- 
-loader.read_dataset('Database.csv',class_path='labelsDefault.txt',separator=',')
-loader.X=loader.normalize([299,435])
+## Pour le dataset avec les coordonnées
+### loader.read_dataset('Database.csv',class_path='labelsDefault.txt',separator=',')
+### loader.X=loader.normalize([299,435])
