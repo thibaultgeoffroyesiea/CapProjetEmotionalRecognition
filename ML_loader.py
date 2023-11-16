@@ -47,12 +47,12 @@ class DatasetLoader():
     def split_dataset(self,test_size=0.2): #slit dataset into train and test
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_size)
     
-    def split_dataset_class(self,class_to_group): #split dataset into train and test based on class
+    def split_dataset_class(self,class_to_group,random_state=1): #split dataset into train and test based on class
         # Initialize empty lists to store merged sets
         X_train_merged, X_test_merged, y_train_merged, y_test_merged = [], [], [], []
         for i in class_to_group.values():
             df_temp=self.df[self.df['class'].isin(i)]
-            X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp['class'], test_size=0.2)
+            X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp['class'], test_size=0.2,random_state=random_state)
             X_train_merged.append(X_train)
             X_test_merged.append(X_test)
             y_train_merged.append(y_train)
@@ -61,11 +61,11 @@ class DatasetLoader():
         # Merge sets
         return X_train_merged, X_test_merged, y_train_merged, y_test_merged
     
-    def split_dataset_data(self,n): #split dataset by data size
+    def split_dataset_data(self,n,random_state=1): #split dataset by data size
         X_train_merged,X_test_merged,y_train_merged,y_test_merged=[],[],[],[]
         df_copy=self.df.copy()
         df_copy.pop('class')
-        skf=StratifiedKFold(n_splits=n,shuffle=False)
+        skf=StratifiedKFold(n_splits=n,shuffle=True,random_state=random_state)
         skf.get_n_splits(self.X_train,self.y_train)
         for i,(train_index, test_index) in enumerate(skf.split(self.X, self.y)):
             X_train_fold=df_copy.iloc[train_index]
