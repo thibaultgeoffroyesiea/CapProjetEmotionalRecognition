@@ -40,10 +40,8 @@ class DatasetLoader():
     
     def add_dataset(self,file_path): #add dataset to existing dataset
         df_temp = pd.read_csv(file_path)
-        print(df_temp.head())
-        df = pd.concat([self.df,df_temp],axis=1)
-        print(df.head())
-        self.X=df
+        self.X = pd.concat([self.X,df_temp],axis=1)
+        self.df=pd.concat([self.X,self.y],axis=1)
 
     def normalize(self,features_to_normalize=None): #features_to_normalize is a list of index
         if features_to_normalize!=None:
@@ -63,7 +61,6 @@ class DatasetLoader():
         df_used=pd.concat([self.X,self.y],axis=1)
         for i in class_to_group.values():
             df_temp=df_used[df_used[y_column].isin(i)]
-            print(df_temp.head())
             X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp[y_column], test_size=test_size,random_state=random_state)
             X_train_merged.append(X_train)
             X_test_merged.append(X_test)
