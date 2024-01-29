@@ -22,16 +22,28 @@ class DatasetLoader():
         self.numbers_of_classes = None
         self.classes=None
 
-    def read_dataset(self,file_path,separator=',',class_path=None):
+    def read_dataset(self,file_path,separator=',',y_column=None,class_path=None):
         df = pd.read_csv(file_path, sep=separator)
-        self.X = df.copy()
         if class_path!=None:
+            self.df=df.copy()
+            self.X = df.copy()
             df['class'] = pd.read_csv(class_path)
             self.y = df['class']
             self.classes=df['class'].unique()
             self.numbers_of_classes = len(self.classes)
-        self.df=df
-
+        else:
+            self.df=df.copy()
+            self.y=df[y_column]
+            self.classes=df[y_column].unique()
+            self.numbers_of_classes = len(self.classes)
+            self.X=df.drop(columns=[y_column])
+    
+    def add_dataset(self,file_path): #add dataset to existing dataset
+        df_temp = pd.read_csv(file_path)
+        print(df_temp.head())
+        df = pd.concat([self.df,df_temp],axis=1)
+        print(df.head())
+        self.X=df
 
     def normalize(self,features_to_normalize=None): #features_to_normalize is a list of index
         if features_to_normalize!=None:
@@ -45,13 +57,14 @@ class DatasetLoader():
     def split_dataset(self,test_size=0.2,random_state=1): #slit dataset into train and test
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_size,random_state=random_state)
     
-    def split_dataset_class(self,class_to_group,test_size=0.2,random_state=1): #split dataset into train and test based on class
+    def split_dataset_class(self,class_to_group,test_size=0.2,random_state=1,y_column="class"): #split dataset into train and test based on class
         # Initialize empty lists to store merged sets
         X_train_merged, X_test_merged, y_train_merged, y_test_merged = [], [], [], []
         df_used=pd.concat([self.X,self.y],axis=1)
         for i in class_to_group.values():
-            df_temp=df_used[df_used['class'].isin(i)]
-            X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp['class'], test_size=test_size,random_state=random_state)
+            df_temp=df_used[df_used[y_column].isin(i)]
+            print(df_temp.head())
+            X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp[y_column], test_size=test_size,random_state=random_state)
             X_train_merged.append(X_train)
             X_test_merged.append(X_test)
             y_train_merged.append(y_train)
