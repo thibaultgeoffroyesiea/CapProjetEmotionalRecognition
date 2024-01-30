@@ -3,7 +3,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from sklearn.model_selection import train_test_split,StratifiedKFold,RandomizedSearchCV
 from sklearn.metrics import homogeneity_score
-from sklearn.preprocessing import normalize
+from sklearn.preprocessing import Normalizer,StandardScaler,MinMaxScaler
 from memory_profiler import memory_usage
 
 import matplotlib.pyplot as plt
@@ -43,9 +43,15 @@ class DatasetLoader():
         self.X = pd.concat([self.X,df_temp],axis=1)
         self.df=pd.concat([self.X,self.y],axis=1)
 
-    def normalize(self,features_to_normalize=None): #features_to_normalize is a list of index
+    def normalize_features(self,features_to_normalize=None,normalization="StandardScaler"): #features_to_normalize is a list of index start and end of features to normalize [start,end], every between start and end will be normalized
         if features_to_normalize!=None:
-            return pd.DataFrame(normalize(self.X.iloc[:,features_to_normalize[0]:features_to_normalize[1]]),columns=self.X.columns[features_to_normalize[0]:features_to_normalize[1]])
+            if normalization=="StandardScaler":
+                scaler = StandardScaler()
+            elif normalization=="MinMaxScaler":
+                scaler = MinMaxScaler()
+            elif normalization=="Normalizer":
+                scaler = Normalizer()
+            return pd.DataFrame(scaler.fit_transform(self.X.iloc[:,features_to_normalize[0]:features_to_normalize[1]]),columns=self.X.columns[features_to_normalize[0]:features_to_normalize[1]])
 
     def select_classes(self,classes): #classes is a list of classes [class1,class2,...] with len(classes) = len of dataset
         self.y = classes
@@ -110,6 +116,7 @@ class ModelLoader():
         self.optimal_params = self.optimizer_model.best_params_
 
     def fit_train(self,X_train,y_train):
+        print("Fit")
         return memory_usage(( self.model.fit, (X_train,y_train), {}), retval=True)
 
     def partial_fit_train(self,X_train,y_train,classes): # IF model compatible with partial_fit
@@ -118,6 +125,9 @@ class ModelLoader():
         
     def predict(self,X_test):
         return self.model.predict(X_test)
+    
+    def predict_proba(self,X_test):
+        return self.model.predict_proba(X_test)
     
     def score(self,X_test,y_test):
         return self.model.score(X_test,y_test)
