@@ -59,7 +59,7 @@ class DatasetLoader():
         self.numbers_of_classes = len(self.classes)
         
     def split_dataset(self,test_size=0.2,random_state=1): #slit dataset into train and test
-        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_size,random_state=random_state)
+        self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y, test_size=test_size,random_state=random_state,stratify=self.y)
     
     def split_dataset_class(self,class_to_group,test_size=0.2,random_state=1,y_column="class"): #split dataset into train and test based on class
         # Initialize empty lists to store merged sets
@@ -67,7 +67,7 @@ class DatasetLoader():
         df_used=pd.concat([self.X,self.y],axis=1)
         for i in class_to_group.values():
             df_temp=df_used[df_used[y_column].isin(i)]
-            X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp[y_column], test_size=test_size,random_state=random_state,shuffle=False)
+            X_train, X_test, y_train, y_test = train_test_split(df_temp.iloc[:,:-1], df_temp[y_column], test_size=test_size,random_state=random_state)
             X_train_merged.append(X_train)
             X_test_merged.append(X_test)
             y_train_merged.append(y_train)
