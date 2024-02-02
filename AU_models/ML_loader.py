@@ -3,6 +3,7 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 from sklearn.model_selection import train_test_split,StratifiedKFold,RandomizedSearchCV
 from sklearn.metrics import homogeneity_score
+from sklearn.base import clone
 from sklearn.preprocessing import Normalizer,StandardScaler,MinMaxScaler
 from memory_profiler import memory_usage
 
@@ -96,7 +97,6 @@ class DatasetLoader():
 class ModelLoader():
     def __init__(self):
         self.model=None
-        self.initial_model=None
         self.optimizer_model=None
         self.optimal_params=None
 
@@ -105,10 +105,9 @@ class ModelLoader():
 
     def set_model(self,model):
         self.model=model
-        self.initial_model=model
 
     def reset_model(self):
-        self.model=self.initial_model
+        self.model=clone(self.model)
 
     def optimize(self,X_train,y_train,cv=5,scoring='accuracy',n_iter=10):
         self.optimizer_model = RandomizedSearchCV(self.model,self.optimal_params,cv=cv,scoring=scoring,n_iter=n_iter)
