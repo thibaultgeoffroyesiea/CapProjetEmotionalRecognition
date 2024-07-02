@@ -1,2 +1,4 @@
 
-/Features_extraction
+/Features_extraction/database*
+/Features_extraction/models*
+*csv
